@@ -29,12 +29,10 @@ node_position_t btree_find_node(node_t* t, int key) {
         if (i < t->n_keys && key == t->keys[i]->key) {
                 return node_position_new(t, i);
         }
-        else if (t->is_leaf)
-        {
+        else if (t->is_leaf) {
                 return node_position_new(NULL, -1);
         }
-        else
-        {
+        else {
                 return btree_find_node(t->children[i], key );
         }
 }
@@ -49,12 +47,12 @@ node_position_t btree_insert(BTree* bt, int key) {
 
         if (r->n_keys == 2*bt->order -1) {
                 #if DEBUG
-                printf("node full - spliting up");
+                printf("node full - spliting up\n");
                 #endif
 
                 node_t *s = node_new(bt->order, FALSE);
                 s->children[0] = r;
-                bt->root = r;
+                bt->root = s;
                 btree_split(s, 0, bt->order);
                 return btree_insert_nonfull(s, key, bt->order);
         }
@@ -67,36 +65,82 @@ node_position_t btree_insert(BTree* bt, int key) {
         }
 }
 
-void btree_split(node_t *x, int i, uint t)
-{
+void btree_split(node_t *x, int i, uint t) {
+        #if DEBUG
+        printf("at btree_split()\n");
+        #endif
+
         node_t *y = x->children[i];
+        assert(y != NULL);
         node_t *z = node_new(t, y->is_leaf);
         z->n_keys = t-1;
+        #if DEBUG
+        printf("moving keys from root to right: ");
+        #endif
         int j;
-        for(j=0; j < t-1; j++) {
+        for (j = 0; j < t-1; j++) {
                 z->keys[j] = y->keys[j+t];
+
+                #if DEBUG
+                printf("%d, ", z->keys[j]->key);
+                #endif
         }
-        if(!y->is_leaf )
-        {
-                for(j=0; j<t; j++) {
+        #if DEBUG
+        printf("\n");
+        #endif
+
+        if (!y->is_leaf) {
+                #if DEBUG
+                printf("moving children from root to right: ");
+                #endif
+                for (j = 0; j < t; j++) {
                         z->children[j] = y->children[j+t];
                 }
         }
         y->n_keys = t-1;
-        for(j= x->n_keys; j> i+1; j--) {
+        #if DEBUG
+        printf("deslocating new-root childrens pos: ");
+        #endif
+        for (j = x->n_keys; j > i+1; j--) {
                 x->children[j+1] = x->children[j];
+                #if DEBUG
+                printf("%d, ", j);
+                #endif
         }
+        #if DEBUG
+        printf("\n");
+        #endif
+        #if DEBUG
+        printf("z goes to children-index %d of x\n",i+1);
+        #endif
+
         x->children[i+1] = z;
-        for(j= x->n_keys-1; j>i; j--) {
-                x->keys[j+1]=x->keys[j];
+        #if DEBUG
+        printf("moving %d keys: ", x->n_keys);
+        #endif
+        for (j = x->n_keys-1; j > i; j--) {
+                x->keys[j+1] = x->keys[j];
+                #if DEBUG
+                printf("%d, ", x->keys[j+1]->key);
+                #endif
         }
-        x->keys[i] = y->keys[t];
-        x->n_keys = x->n_keys +1;
+
+        #if DEBUG
+        printf("\n");
+        #endif
+        #if DEBUG
+        printf("inserting key %d at %d of new-root\n", y->keys[t-1]->key, i);
+        #endif
+        x->keys[i] = y->keys[t-1];
+        #if DEBUG
+        printf("at right of new-root there is: %d\n", x->children[1]->keys[0]->key);
+        #endif
+        x->n_keys++;
 }
 
 node_position_t btree_insert_nonfull(node_t * N, int k, int t) {
         #if DEBUG
-        printf("at btree_insert_nonfull()\n");
+        printf("at btree_insert_nonfull() with key %d\n", k);
         #endif
 
         int i = N->n_keys -1;
@@ -110,11 +154,14 @@ node_position_t btree_insert_nonfull(node_t * N, int k, int t) {
                         i--;
                 }
 
-                N->keys[i+1]->key = k;
+                N->keys[i+1] = pair_new(k, NULL);
                 N->n_keys++;
+                #if DEBUG
+                printf("inserted key %d at position %d\n", k, i+1);
+                #endif
                 return node_position_new(N,i+1);
         }
-        else{
+        else {
                 while(i>=0 && k<N->keys[i]->key) {
                         i--;
                 }
