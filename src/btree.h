@@ -28,8 +28,11 @@ BTree* btree_new(int order);
 void btree_delete(BTree *bt);
 
 node_position_t btree_find(BTree* bt, int key);
+node_position_t btree_find_node(node_t* t, int key);
 node_position_t btree_insert(BTree* bt, int key);
 node_position_t btree_remove(BTree* bt, int key);
+void btree_split(node_t *x, int i, uint t);
+node_position_t btree_insert_nonfull(node_t * N, int k,int t);
 
 
 #endif

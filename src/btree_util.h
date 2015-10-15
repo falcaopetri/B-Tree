@@ -23,7 +23,7 @@ typedef struct pair_t {
 /*
   Nó da B-Tree
   is_leaf:    esse é um nó-folha?
-  n_children: número de nós-filho ativos
+  n_keys:      número de chaves ativas
   level:      nível em que esse nó se encontra em relação à B-Tree
 
   children:   ponteiro para a lista de nós-filhos
@@ -31,11 +31,11 @@ typedef struct pair_t {
 */
 typedef struct node_t {
     bool is_leaf;
-    uint n_children;
+    uint n_keys;
     uint level;
 
     struct node_t **children;
-    pair_t **keys;
+    pair_t *keys;
 } node_t;
 
 /*
