@@ -6,7 +6,7 @@ node_position_t node_position_new(node_t *node, uint indice) {
   return node_pos;
 }
 
-pair_t* pair_new(int key, void *value) { 
+pair_t* pair_new(int key, void *value) {
   pair_t* p = malloc(sizeof(pair_t));
 
   assert(p != NULL);
@@ -18,7 +18,7 @@ pair_t* pair_new(int key, void *value) {
   p->key = key;
   p->value = value;
 
-  return p; 
+  return p;
 }
 
 node_t* node_new(uint order, int is_leaf) {
@@ -29,7 +29,7 @@ node_t* node_new(uint order, int is_leaf) {
     printf("allocated new node\n");
     #endif
 
-
+    n->n_keys = 0;
     n->is_leaf = is_leaf;
     n->keys = malloc((2*order-1) * sizeof(pair_t*));
     n->children = malloc((2*order) * sizeof(node_t*));
