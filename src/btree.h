@@ -12,14 +12,14 @@
 #include "btree_util.h"
 
 /*
-  B-Tree
-  order:  número da ordem da B-Tree (cada nó da B-Tree possui [order-1, 2*order-1] filhos)
-  root:   ponteiro para o nó raiz da B-Tree ([2, 2*order-1] filhos)
-*/
+   B-Tree
+   order:  número da ordem da B-Tree (cada nó da B-Tree possui [order-1, 2*order-1] filhos)
+   root:   ponteiro para o nó raiz da B-Tree ([2, 2*order-1] filhos)
+ */
 typedef struct btree_t {
-    int order;
+        int order;
 
-    node_t* root;
+        node_t* root;
 
 } BTree;
 

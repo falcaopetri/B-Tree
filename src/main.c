@@ -7,19 +7,39 @@ void one_tree() {
 	printf("one_tree()\n");
 	#endif
 
-	BTree* tree = btree_new(4);
+	BTree* tree = btree_new(2);
 
 	btree_insert(tree, 5);
+	#if DEBUG
+	printf("\n");
+	#endif
 	btree_insert(tree, 1);
-	/*btree_insert(tree, 10);
+	#if DEBUG
+	printf("\n");
+	#endif
+	btree_insert(tree, 10);
+	#if DEBUG
+	printf("\n");
+	#endif
 	btree_insert(tree, 20);
+	#if DEBUG
+	printf("\n");
+	#endif
 	btree_insert(tree, 12);
-	btree_insert(tree, 8);*/
+	#if DEBUG
+	printf("\n");
+	#endif
+	btree_insert(tree, 8);
+	#if DEBUG
+	printf("\n");
+	#endif
 
-	node_position_t A = btree_find(tree, 5);
-	// node_position_t B = btree_find(tree, 2);
-	printf("%d\n", A.indice);
-	// printf("%d\n",B.indice);
+	printf("1: %d\n", btree_find(tree, 1).indice);
+	printf("5: %d\n", btree_find(tree, 5).indice);
+	printf("8: %d\n", btree_find(tree, 8).indice);
+	printf("10: %d\n",btree_find(tree, 10).indice);
+	printf("12: %d\n",btree_find(tree, 12).indice);
+	printf("20: %d\n",btree_find(tree, 20).indice);
 	btree_delete(tree);
 
 	#if DEBUG
