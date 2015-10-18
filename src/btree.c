@@ -9,35 +9,35 @@ BTree* btree_new(int order) {
         #endif
 
         bt->order = order;
-        bt->root = node_new(order, TRUE);
+        bt->root = _node_new(order, TRUE);
 
         return bt;
 }
 
-node_position_t btree_find(BTree* bt, int key) {
+node_position btree_find(BTree* bt, int key) {
         #if DEBUG
         printf("calling btree_find_node() over key: %d\n", key);
         #endif
-        return btree_find_node (bt->root, key);
+        return _btree_find_node(bt->root, key);
 }
 
-node_position_t btree_find_node(node_t* t, int key) {
+node_position _btree_find_node(node_t* t, int key) {
         int i = 0;
         while (i < t->n_keys && key > t->keys[i]->key) {
                 i++;
         }
         if (i < t->n_keys && key == t->keys[i]->key) {
-                return node_position_new(t, i);
+                return _node_position_new(t, i);
         }
         else if (t->is_leaf) {
-                return node_position_new(NULL, -1);
+                return _node_position_new(NULL, -1);
         }
         else {
-                return btree_find_node(t->children[i], key );
+                return _btree_find_node(t->children[i], key );
         }
 }
 
-node_position_t btree_insert(BTree* bt, int key) {
+node_position btree_insert(BTree* bt, int key) {
         #if DEBUG
         printf("inserting key: %d\n", key);
         #endif
@@ -50,29 +50,29 @@ node_position_t btree_insert(BTree* bt, int key) {
                 printf("node full - spliting up\n");
                 #endif
 
-                node_t *s = node_new(bt->order, FALSE);
+                node_t *s = _node_new(bt->order, FALSE);
                 s->children[0] = r;
                 bt->root = s;
-                btree_split(s, 0, bt->order);
-                return btree_insert_nonfull(s, key, bt->order);
+                _btree_split(s, 0, bt->order);
+                return _btree_insert_nonfull(s, key, bt->order);
         }
         else {
                 #if DEBUG
                 printf("root not full. calling btree_insert_nonfull()\n");
                 #endif
 
-                return btree_insert_nonfull(r, key, bt->order);
+                return _btree_insert_nonfull(r, key, bt->order);
         }
 }
 
-void btree_split(node_t *x, int i, uint t) {
+void _btree_split(node_t *x, int i, uint t) {
         #if DEBUG
         printf("at btree_split()\n");
         #endif
 
         node_t *y = x->children[i];
         assert(y != NULL);
-        node_t *z = node_new(t, y->is_leaf);
+        node_t *z = _node_new(t, y->is_leaf);
         z->n_keys = t-1;
         #if DEBUG
         printf("moving keys from root to right: ");
@@ -138,7 +138,7 @@ void btree_split(node_t *x, int i, uint t) {
         x->n_keys++;
 }
 
-node_position_t btree_insert_nonfull(node_t * N, int k, int t) {
+node_position _btree_insert_nonfull(node_t * N, int k, int t) {
         #if DEBUG
         printf("at btree_insert_nonfull() with key %d\n", k);
         #endif
@@ -154,12 +154,12 @@ node_position_t btree_insert_nonfull(node_t * N, int k, int t) {
                         i--;
                 }
 
-                N->keys[i+1] = pair_new(k, NULL);
+                N->keys[i+1] = _pair_new(k, NULL);
                 N->n_keys++;
                 #if DEBUG
                 printf("inserted key %d at position %d\n", k, i+1);
                 #endif
-                return node_position_new(N,i+1);
+                return _node_position_new(N,i+1);
         }
         else {
                 while(i>=0 && k<N->keys[i]->key) {
@@ -168,25 +168,25 @@ node_position_t btree_insert_nonfull(node_t * N, int k, int t) {
                 i++;
                 if(N->children[i]->n_keys == 2*t-1)
                 {
-                        btree_split(N, i,t);
+                        _btree_split(N, i,t);
                         if(k > N->keys[i]->key) {
                                 i++;
                         }
                 }
-                return btree_insert_nonfull(N->children[i], k, t);
+                return _btree_insert_nonfull(N->children[i], k, t);
         }
 }
 
-node_position_t btree_remove(BTree* bt, int key) {
-        // TODO implementar
-
-        return node_position_new(NULL, -1);
+node_position btree_remove(BTree* bt, int key) {
+        assert(bt != NULL);
+        return _node_position_new(NULL, -1);
+        //return _btree_remove_node(bt->root, key, bt->order);
 }
 
 void btree_delete(BTree *bt) {
-    #if DEBUG
+        #if DEBUG
         printf("deleting b-tree\n");
-    #endif
+        #endif
 
         // TODO update
         free(bt->root);

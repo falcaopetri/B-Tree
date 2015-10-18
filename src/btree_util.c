@@ -1,12 +1,12 @@
 #include "btree_util.h"
 
-node_position_t node_position_new(node_t *node, uint indice) {
-  node_position_t node_pos = {.node = node, .indice = indice};
+node_position _node_position_new(node_t *node, uint indice) {
+  node_position node_pos = {.node = node, .indice = indice};
 
   return node_pos;
 }
 
-pair_t* pair_new(int key, void *value) {
+pair_t* _pair_new(int key, void *value) {
         pair_t *p = malloc(sizeof(pair_t));
 
         assert(p != NULL);
@@ -21,7 +21,7 @@ pair_t* pair_new(int key, void *value) {
         return p;
 }
 
-node_t* node_new(uint order, int is_leaf) {
+node_t* _node_new(uint order, int is_leaf) {
         node_t *n = malloc(sizeof(node_t));
         assert(n != NULL);
 

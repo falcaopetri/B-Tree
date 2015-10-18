@@ -47,10 +47,10 @@ typedef struct node_t {
 typedef struct node_position_t {
         node_t *node;
         uint indice;
-} node_position_t;
+} node_position;
 
-node_position_t node_position_new(node_t *node, uint indice);
-node_t* node_new(uint order, int is_leaf);
-pair_t* pair_new(int key, void *value);
+node_position _node_position_new(node_t *node, uint indice);
+node_t* _node_new(uint order, int is_leaf);
+pair_t* _pair_new(int key, void *value);
 
 #endif
