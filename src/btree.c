@@ -179,8 +179,207 @@ node_position _btree_insert_nonfull(node_t * N, int k, int t) {
 
 node_position btree_remove(BTree* bt, int key) {
         assert(bt != NULL);
-        return _node_position_new(NULL, -1);
-        //return _btree_remove_node(bt->root, key, bt->order);
+        node_position pos = _btree_remove_node(bt->root, key, bt->order);
+        if (bt->root->n_keys == 0 && pos.node != bt->root) {
+            #if DEBUG
+            printf("BTree root became empty. New root will be its left child\n");
+            #endif
+            bt->root = bt->root->children[0];
+            printf("DDD: %d\n", bt->root->n_keys);
+        }
+
+        return pos;
+}
+
+node_position _node_find_max(node_t *node) {
+        return _node_position_new(node, node->n_keys-1);
+}
+
+node_position _node_find_min(node_t *node) {
+        return _node_position_new(node, 0);
+}
+
+node_position _btree_remove_node(node_t *node, int key, int order) {
+        #if DEBUG
+        printf("at btree_remove_node() to remove key %d\n", key);
+        #endif
+        int i = 0;
+        while (i < node->n_keys && key > node->keys[i]->key) {
+                i++;
+        }
+
+        if (i < node->n_keys && key == node->keys[i]->key) {
+                #if DEBUG
+                printf("found %d at pos %d\n", key, i);
+                #endif
+                if (node->is_leaf) {
+                        /*
+                            Caso 1: Se a chave k está em um nó x e x é uma
+                            folha, remova a chave k de x
+                         */
+                        #if DEBUG
+                        printf("case 1. node is leaf. removing.\n");
+                        #endif
+                        free(node->keys[i]);
+                        node->n_keys--;
+                        int j;
+                        for (j = i; j < node->n_keys; ++j) {
+                                node->keys[j] = node->keys[j+1];
+                        }
+
+                        return _node_position_new(node, i);
+                }
+                else {
+                        /*
+                            Caso 2: Se a chave k está em um nó x e x é um nó
+                            interno.
+                         */
+                        node_t *left = node->children[i];
+                        node_t *right = node->children[i+1];
+                        if (left->n_keys >= order) {
+                                /*
+                                    a) Se o nó filho y que precede k no nó x
+                                    tem pelo menos t chaves, encontre o
+                                    predecessor k’ de k na subárvore
+                                    enraizada em y.
+                                    Remova k’, e substitua k por k’ em x.
+                                */
+                                #if DEBUG
+                                printf("case 2a. left sibling has %d keys.\n", left->n_keys);
+                                #endif
+                                #if DEBUG
+                                printf("deleting key %d\n", node->keys[i]->key);
+                                #endif
+                                free(node->keys[i]);
+
+                                node_position max = _node_find_max(left);
+                                node->keys[i] = _pair_copy(left->keys[max.indice]);
+
+                                _btree_remove_node(left, node->keys[i]->key, order);
+                                return _node_position_new(node, i);
+                        }
+                        else if (right->n_keys >= order) {
+                                /*
+                                    Caso simétrico ao 2a. Se o nó filho y que
+                                    precede k no nó x tem menos que t chaves,
+                                    examine o nó filho z que vem depois de
+                                    k no nó x.
+                                 */
+
+                                #if DEBUG
+                                printf("case 2b. right sibling has %d keys.\n", right->n_keys);
+                                #endif
+
+                                #if DEBUG
+                                printf("deleting key %d\n", node->keys[i]->key);
+                                #endif
+                                free(node->keys[i]);
+
+                                node_position min = _node_find_min(right);
+                                node->keys[i] = _pair_copy(right->keys[min.indice]);
+
+                                _btree_remove_node(right, node->keys[i]->key, order);
+                                return _node_position_new(node, i);
+                        }
+                        else {
+                                /*
+                                    2c) Se ambos os nós filhos y e z possuem
+                                    apenas t-1 chaves, concatena-se k e todo o
+                                    conteúdo de z com y, de maneira que x perca
+                                    a chave k e o ponteiro para z
+                                 */
+                                #if DEBUG
+                                printf("case 2c\n");
+                                #endif
+
+                                left->keys[order-1] = node->keys[i];
+                                int j;
+                                for (j = 0; j < order-1; ++j) {
+                                        left->keys[order+j] = _pair_copy(right->keys[j]);
+                                        free(right->keys[j]);
+                                }
+                                for (j = 0; j < order; ++j) {
+                                        left->children[order+j] = right->children[j];
+                                }
+                                left->n_keys = 2*order - 1;
+                                for (j = 0; j < left->n_keys; ++j) {
+                                    printf("%d - ", left->keys[j]->key);
+                                }
+                                printf("\n");
+                                free(right->children);
+                                free(right->keys);
+                                free(right);
+
+                                for (j = i; j < node->n_keys-1; ++j) {
+                                    node->keys[j] = node->keys[j+1];
+                                }
+                                for (j = i; j < node->n_keys-1; ++j) {
+                                    node->children[j+1] = node->children[j+2];
+                                }
+                                node->n_keys--;
+
+                                return _btree_remove_node(left, key, order);
+                        }
+                }
+        }
+        else {
+                // TODO next == left
+                node_t *next = node->children[i];
+
+                if (next->n_keys == order-1) {
+                        node_t *left = node->children[i];
+                        node_t *right = node->children[i+1];
+
+                        if (left->n_keys >= order) {
+                                // TODO
+                                node_position max = _node_find_max(left);
+                                pair_t* p = left->keys[max.indice];
+
+                                // swap(left->keys[max.indice], node->keys[i], sizeof(node->keys[i]));
+                                // swap(left->children[max.indice], node->children[i], sizeof(node->children[i]));
+
+                                return _btree_remove_node(left, key, order);
+                        }
+                        else if (right->n_keys >= order) {
+                                // TODO
+                                node_position min = _node_find_min(right);
+                                pair_t* p = right->keys[min.indice];
+                                // swap(right->keys[min.indice], node->keys[i], sizeof(node->keys[i]));
+                                // swap(right->children[min.indice], node->children[i], sizeof(node->children[i]));
+
+                                return _btree_remove_node(right, key, order);
+                        }
+                        else {
+                                left->keys[order-1] = _pair_copy(node->keys[i]);
+                                free(node->keys[i]);
+
+                                int j;
+                                for (j = i; j < node->n_keys-1; ++j) {
+                                    node->keys[j] = node->keys[j+1];
+                                }
+                                for (j = i; j < node->n_keys-1; ++j) {
+                                    node->children[j+1] = node->children[j+2];
+                                }
+
+                                node->n_keys--;
+
+                                for (j = 0; j < order-1; ++j) {
+                                        left->keys[order+j] = _pair_copy(right->keys[j]);
+                                        free(right->keys[j]);
+                                }
+                                for (j = 0; j < order; ++j) {
+                                        left->children[order+j] = right->children[j];
+                                }
+                                free(right->children);
+                                free(right->keys);
+                                free(right);
+
+                                return _btree_remove_node(left, key, order);
+                        }
+                }
+
+                return _btree_remove_node(next, key, order);
+        }
 }
 
 void btree_delete(BTree *bt) {
@@ -188,7 +387,11 @@ void btree_delete(BTree *bt) {
         printf("deleting b-tree\n");
         #endif
 
-        // TODO update
+        // TODO make this efficient
+        while (bt->root->n_keys > 0) {
+            btree_remove(bt, bt->root->keys[0]->key);
+        }
+
         free(bt->root);
         free(bt);
 }
