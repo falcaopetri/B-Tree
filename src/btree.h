@@ -35,4 +35,7 @@ void _btree_split(node_t *x, int i, uint t);
 node_position _btree_insert_nonfull(node_t * N, int k,int t);
 node_position _btree_remove_node(node_t *node, int key, int order);
 
+inline node_position _node_find_max(node_t *node);
+inline node_position _node_find_min(node_t *node);
+
 #endif

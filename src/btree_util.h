@@ -52,6 +52,16 @@ typedef struct node_position_t {
 node_position _node_position_new(node_t *node, uint indice);
 node_t* _node_new(uint order, int is_leaf);
 pair_t* _pair_new(int key, void *value);
+
 pair_t* _pair_copy(pair_t *p);
 
+inline bool _node_find_key(node_t *node, int key, int* pos);
+
+inline void _node_deslocate_keys_up(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from);
+inline void _node_deslocate_keys_down(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from);
+
+inline void _node_deslocate_children_up(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from);
+inline void _node_deslocate_children_down(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from);
+
+inline void _node_delete(node_t *node);
 #endif
