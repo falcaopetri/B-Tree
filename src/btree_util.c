@@ -1,9 +1,9 @@
 #include "btree_util.h"
 
 node_position _node_position_new(node_t *node, uint indice) {
-  node_position node_pos = {.node = node, .indice = indice};
+        node_position node_pos = {.node = node, .indice = indice};
 
-  return node_pos;
+        return node_pos;
 }
 
 pair_t* _pair_new(int key, void *value) {
@@ -11,9 +11,9 @@ pair_t* _pair_new(int key, void *value) {
 
         assert(p != NULL);
 
-  	#if DEBUG
+        #if DEBUG
         printf("allocated new pair with key: %d\n", key);
-  	#endif
+        #endif
 
         p->key = key;
         p->value = value;
@@ -21,13 +21,18 @@ pair_t* _pair_new(int key, void *value) {
         return p;
 }
 
-node_t* _node_new(uint order, int is_leaf) {
+pair_t* _pair_copy(pair_t *p) {
+        pair_t *new = _pair_new(p->key, p->value);
+        return new;
+}
+
+node_t* _node_new(uint order, bool is_leaf) {
         node_t *n = malloc(sizeof(node_t));
         assert(n != NULL);
 
-   	 #if DEBUG
+        #if DEBUG
         printf("allocated new node\n");
-    	#endif
+        #endif
 
         n->n_keys = 0;
         n->is_leaf = is_leaf;
@@ -35,4 +40,68 @@ node_t* _node_new(uint order, int is_leaf) {
         n->children = malloc((2*order) * sizeof(node_t*));
 
         return n;
+}
+
+inline bool _node_find_key(node_t *node, int key, int *pos) {
+    *pos = 0;
+    while ((*pos) < node->n_keys && key > node->keys[(*pos)]->key) {
+            (*pos)++;
+    }
+
+    return (*pos) < node->n_keys && key == node->keys[(*pos)]->key;
+}
+
+inline void _node_deslocate_keys_up(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+    int j;
+    for (j = beg; j < end; j++) {
+            to->keys[j + padding_to] = from->keys[j + padding_from];
+
+            #if DEBUG
+            printf("%d, ", to->keys[j + padding_to]->key);
+            #endif
+    }
+}
+
+inline void _node_deslocate_keys_down(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+    int j;
+    for (j = beg; j > end; j--) {
+            to->keys[j + padding_to] = from->keys[j + padding_from];
+            #if DEBUG
+            printf("%d, ", to->keys[j + padding_to]->key);
+            #endif
+    }
+}
+
+inline void _node_deslocate_children_up(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+    int j;
+    for (j = beg; j < end; j++) {
+            to->children[j + padding_to] = from->children[j + padding_from];
+            #if DEBUG
+            printf("%d, ", j + padding_from);
+            #endif
+    }
+}
+
+inline void _node_deslocate_children_down(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+    int j;
+    for (j = beg; j > end; j--) {
+            to->children[j + padding_to] = from->children[j + padding_from];
+            #if DEBUG
+            printf("%d, ", j + padding_from);
+            #endif
+    }
+}
+
+inline node_position _node_find_max(node_t *node) {
+        return _node_position_new(node, node->n_keys-1);
+}
+
+inline node_position _node_find_min(node_t *node) {
+        return _node_position_new(node, 0);
+}
+
+inline void _node_delete(node_t *node) {
+    free(node->children);
+    free(node->keys);
+    free(node);
 }
