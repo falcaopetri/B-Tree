@@ -14,6 +14,15 @@ void print_find_n(BTree *tree, int *nums, uint n) {
 	printf("\n");
 }
 
+void print_find_assert_n(BTree *tree, int *nums, int *pos, uint n) {
+	int i;
+	for (i = 0; i < n; ++i) {
+		int p = btree_find(tree, nums[i]).indice;
+		printf("%d at %d\n", nums[i], p);
+		assert(p == pos[i]);
+	}
+}
+
 void print_insert(BTree *tree, int key) {
 	btree_insert(tree, key);
 	#if DEBUG
@@ -55,14 +64,18 @@ void one_tree() {
 
 	BTree* tree = btree_new(2);
 
-
+	int n = 6;
 	int nums_insert[] = {5, 1, 10, 12, 20, 8};
 	int nums_find[] = {1, 5, 8, 10, 12, 20};
+	int nums_find_pos[] = {0, 0, 0, 1, 1, 0}; // btree_new(2); 6 elementos
+	// int nums_find_pos[] = {0, 0, -1, 0, 1, 2}; // btree_new(2); 5 elementos
+	// int nums_find_pos[] = {0, 1, -1, 2, 3, 4}; // btree_new(3); 5 elementos
 	int nums_remove[] = {5, 8, 10, 12, 20, 1};
 
-	print_insert_n(tree, nums_insert, 6);
-	print_find_n(tree, nums_find, 6);
-	print_remove_n(tree, nums_remove, 6);
+	print_insert_n(tree, nums_insert, n);
+	print_find_n(tree, nums_find, n);
+	print_find_assert_n(tree, nums_find, nums_find_pos, n);
+	print_remove_n(tree, nums_remove, n);
 
 	btree_delete(tree);
 

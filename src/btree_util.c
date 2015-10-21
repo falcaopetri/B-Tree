@@ -26,7 +26,7 @@ pair_t* _pair_copy(pair_t *p) {
         return new;
 }
 
-node_t* _node_new(uint order, int is_leaf) {
+node_t* _node_new(uint order, bool is_leaf) {
         node_t *n = malloc(sizeof(node_t));
         assert(n != NULL);
 

@@ -50,7 +50,7 @@ typedef struct node_position_t {
 } node_position;
 
 node_position _node_position_new(node_t *node, uint indice);
-node_t* _node_new(uint order, int is_leaf);
+node_t* _node_new(uint order, bool is_leaf);
 pair_t* _pair_new(int key, void *value);
 
 pair_t* _pair_copy(pair_t *p);
