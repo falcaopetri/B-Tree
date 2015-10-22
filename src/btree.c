@@ -224,7 +224,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				free(node->keys[pos]);
 
 				node_position max = _node_find_max(left);
-				node->keys[pos] = _pair_copy(left->keys[max.indice]);
+				node->keys[pos] = _pair_copy(left->keys[max.index]);
 
 				_btree_remove_node(left, node->keys[pos]->key, order);
 				return _node_position_new(node, pos);
@@ -245,7 +245,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				free(node->keys[pos]);
 
 				node_position min = _node_find_min(right);
-				node->keys[pos] = _pair_copy(right->keys[min.indice]);
+				node->keys[pos] = _pair_copy(right->keys[min.index]);
 
 				_btree_remove_node(right, node->keys[pos]->key, order);
 				return _node_position_new(node, pos);
@@ -279,8 +279,10 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 	}
 	else {
 		if (node->is_leaf) {
-			// Key não foi encontrada em um nó folha == key não
-			// pertence à árvore
+			/*
+			    Key não foi encontrada em um nó folha == key não
+			    pertence à árvore
+			 */
 			return _node_position_new(NULL, -1);
 		}
 
@@ -300,7 +302,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				#endif
 
 				node_position max = _node_find_max(left);
-				pair_t* p = _pair_copy(left->keys[max.indice]);
+				pair_t* p = _pair_copy(left->keys[max.index]);
 
 				#if DEBUG
 				printf("removing %d\n", p->key);
@@ -325,7 +327,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				#endif
 
 				node_position min = _node_find_min(right);
-				pair_t* p = _pair_copy(right->keys[min.indice]);
+				pair_t* p = _pair_copy(right->keys[min.index]);
 
 				#if DEBUG
 				printf("removing %d\n", p->key);

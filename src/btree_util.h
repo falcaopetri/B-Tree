@@ -28,7 +28,7 @@ typedef struct pair_t {
  */
 typedef struct node_t {
     bool is_leaf;
-    uint n_keys;
+    int n_keys;
 
     struct node_t **children;
     pair_t **keys;
@@ -38,16 +38,16 @@ typedef struct node_t {
    Posição de uma key/elemento da B-Tree
    Expõe acesso direto à um nó da B-Tree, incluindo suas chaves e nós-filhos
 
-   node:   ponteiro para o nó
-   indice: indice da key dentro do nó
+   node:    ponteiro para o nó
+   index:   indice da key dentro do nó
  */
 typedef struct node_position_t {
     node_t *node;
-    uint indice;
+    int index;
 } node_position;
 
-node_position _node_position_new(node_t *node, uint indice);
-node_t* _node_new(uint order, bool is_leaf);
+node_position _node_position_new(node_t *node, int index);
+node_t* _node_new(int order, bool is_leaf);
 pair_t* _pair_new(int key, void *value);
 
 inline pair_t* _pair_copy(pair_t *p);
