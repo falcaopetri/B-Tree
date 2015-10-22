@@ -1,23 +1,32 @@
-# TODO Generalizar esse makefile para o diretório examples/
-# TODO Melhorar esse makefile
+# Source: http://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure/
+# TODO tester
 
-CC=gcc
-CC_FLAGS=-c -Wall -DDEBUG=1
-LD_FLAGS=
-C_FILES=$(wildcard src/*.c)
-DIRS=obj
-OBJ_FILES=$(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
+CC := gcc
+SRCDIR := src
+BUILDDIR := build
+TARGET := bin/btree
 
-all: $(DIRS) btree
+SRCEXT := c
+SOURCES:=$(wildcard $(SRCDIR)/*.$(SRCEXT))
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+CFLAGS := -g -Wall -DDEBUG=1
+LIB :=
+INC := -I include
 
-btree: $(OBJ_FILES) 
-	$(CC) $(LD_FLAGS) $^ -o $@
+$(TARGET): $(OBJECTS)
+	@echo " Linking..."
+	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB)
 
-obj/%.o: src/%.c
-	$(CC) $(CC_FLAGS) $< -o $@
-
-$(DIRS):
-	mkdir -p $(DIRS)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(dir $@)
+	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
 clean:
-	rm -f -r obj/ btree
+	@echo " Cleaning...";
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+
+# Tests
+tester:
+	# $(CC) $(CFLAGS) test/tester.cpp $(INC) $(LIB) -o bin/tester
+
+.PHONY: clean

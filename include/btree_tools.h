@@ -1,9 +1,7 @@
 #ifndef B_TREE_TOOLS_H
 #define B_TREE_TOOLS_H
 
-#if DEBUG
 #include <stdio.h>
-#endif
 
 #include "btree.h"
 
