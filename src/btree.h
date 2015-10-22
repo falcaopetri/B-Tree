@@ -22,7 +22,9 @@ typedef struct btree_t {
 } BTree;
 
 BTree* btree_new(int order);
-void btree_delete(BTree *bt);
+void btree_init(BTree *bt, int order);
+void btree_delete_s(BTree *bt);
+void btree_delete_h(BTree *bt);
 
 node_position btree_find(BTree *bt, int key);
 node_position btree_insert(BTree *bt, int key, void *value);

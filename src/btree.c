@@ -8,10 +8,16 @@ BTree* btree_new(int order) {
 	printf("allocated new b-tree of order %d\n", order);
 	#endif
 
-	bt->order = order;
-	bt->root = _node_new(order, TRUE);
+	btree_init(bt, order);
 
 	return bt;
+}
+
+void btree_init(BTree *bt, int order) {
+	assert(bt != NULL);
+
+	bt->order = order;
+	bt->root = _node_new(order, TRUE);
 }
 
 node_position btree_find(BTree* bt, int key) {
@@ -365,7 +371,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 	}
 }
 
-void btree_delete(BTree *bt) {
+void btree_delete_s(BTree *bt) {
 	#if DEBUG
 	printf("deleting b-tree\n");
 	#endif
@@ -379,5 +385,9 @@ void btree_delete(BTree *bt) {
 	}
 
 	free(bt->root);
+}
+
+void btree_delete_h(BTree *bt) {
+	btree_delete_s(bt);
 	free(bt);
 }

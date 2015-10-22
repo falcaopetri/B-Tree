@@ -27,10 +27,26 @@ void one_tree() {
 	print_find_assert_n(tree, nums_find, nums_find_pos, n);
 	print_remove_n(tree, nums_remove, n);
 
-	btree_delete(tree);
+	btree_delete_h(tree);
 
 	#if DEBUG
 	printf("end one_tree()\n");
+	printf("\n");
+	#endif
+}
+
+void stack_tree() {
+	#if DEBUG
+	printf("stack_tree()\n");
+	#endif
+
+	BTree tree;
+	btree_init(&tree, 3);
+
+	btree_delete_s(&tree);
+
+	#if DEBUG
+	printf("end stack_tree()\n");
 	printf("\n");
 	#endif
 }
@@ -43,8 +59,8 @@ void multiple_trees() {
 	BTree* tree2 = btree_new(2);
 	BTree* tree3 = btree_new(3);
 
-	btree_delete(tree2);
-	btree_delete(tree3);
+	btree_delete_h(tree2);
+	btree_delete_h(tree3);
 
 	#if DEBUG
 	printf("end multiple_trees()\n");
@@ -55,7 +71,7 @@ void multiple_trees() {
 int main() {
 
 	one_tree();
-
+	stack_tree();
 	//multiple_trees();
 
 	return 0;
