@@ -167,7 +167,7 @@ node_position btree_remove(BTree* bt, int key) {
 	assert(bt != NULL);
 
 	node_position pos = _btree_remove_node(bt->root, key, bt->order);
-	if (bt->root->n_keys == 0 && pos.node != bt->root) {
+	if (bt->root->n_keys == 0 && pos.node != NULL && pos.node != bt->root) {
 	    #if DEBUG
 		printf("BTree root became empty. New root will be its left child\n");
 	    #endif

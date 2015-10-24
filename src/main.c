@@ -1,78 +1,246 @@
-#if DEBUG
 #include <stdio.h>
-#endif
+#include <string.h>
+#include <unistd.h>
 
 #include "btree.h"
 #include "btree_tools.h"
 
-// TODO Criar diretório examples/ com arquivos de exemplos separados
+#ifdef __linux__
+    #define CLEAR() (system("clear"))
+#elif _WIN32
+    #define CLEAR() (system("cls"))
+#endif
 
-void one_tree() {
-	#if DEBUG
-	printf("one_tree()\n");
-	#endif
+#define MSG_LEN 100
 
-	BTree* tree = btree_new(2);
+void print_header();
 
-	int n = 6;
-	int nums_insert[] = {5, 1, 10, 12, 20, 8};
-	int nums_find[] = {1, 5, 8, 10, 12, 20};
-	int nums_find_pos[] = {0, 0, 0, 1, 1, 0}; // btree_new(2); 6 elementos
-	// int nums_find_pos[] = {0, 0, -1, 0, 1, 2}; // btree_new(2); 5 elementos
-	// int nums_find_pos[] = {0, 1, -1, 2, 3, 4}; // btree_new(3); 5 elementos
-	int nums_remove[] = {5, 8, 10, 12, 20, 1};
+int home_window();
+int about_window();
+int run_window();
+int running_window();
+void goodbye();
 
-	print_insert_n(tree, nums_insert, n);
-	print_find_n(tree, nums_find, n);
-	print_find_assert_n(tree, nums_find, nums_find_pos, n);
-	print_remove_n(tree, nums_remove, n);
+typedef enum {
+	RUN, ABOUT, EXIT, HOME, RUNNING
+} screen;
 
-	btree_delete_h(tree);
+char msg[MSG_LEN];
+BTree *tree;
 
-	#if DEBUG
-	printf("end one_tree()\n");
-	printf("\n");
-	#endif
+int max_keys = 26*26;
+int n_keys;
+char values[26*26][3];
+
+void populate_values() {
+	int i, j;
+	for (i = 0; i < 26; ++i) {
+		for (j = 0; j < 26; ++j) {
+			snprintf(values[i*26+j], 3, "%c%c", 'a'+i, 'a'+j);
+		}
+	}
 }
 
-void stack_tree() {
-	#if DEBUG
-	printf("stack_tree()\n");
-	#endif
+int home_window() {
+	int opt;
+	int n_items = 3;
+	char list[3][12] = { "Nova B-Tree", "Sobre", "Sair" };
 
-	BTree tree;
-	btree_init(&tree, 3);
+	print_header();
 
-	btree_delete_s(&tree);
-
-	#if DEBUG
-	printf("end stack_tree()\n");
+	int i;
+	for (i = 0; i < n_items; ++i) {
+		printf(" %d) %s\n", i+1, list[i]);
+	}
 	printf("\n");
-	#endif
+	printf(" Digite uma opção: ");
+	scanf("%d%*c", &opt);
+
+	if (opt < 1 || opt > n_items) {
+		snprintf(msg, MSG_LEN, " Opção inválida.");
+		return HOME;
+	}
+
+	return opt-1;
 }
 
-void multiple_trees() {
-	#if DEBUG
-	printf("multiple_trees()\n");
-	#endif
-
-	BTree* tree2 = btree_new(2);
-	BTree* tree3 = btree_new(3);
-
-	btree_delete_h(tree2);
-	btree_delete_h(tree3);
-
-	#if DEBUG
-	printf("end multiple_trees()\n");
+int about_window() {
+	print_header();
+	printf( "---------------------------------------------------------\n" \
+	        "--       Trabalho apresentado na disciplina ORI        --\n" \
+	        "--       ministrada pelo Prof. Dr. Ricardo Cerri       --\n" \
+	        "--             UFSCar - São Carlos - 2/2015            --\n" \
+	        "---------------------------------------------------------\n");
 	printf("\n");
-	#endif
+	printf( "---------------------------------------------------------\n" \
+	        "--        Essa é uma aplicação DEMO que insere         --\n" \
+	        "--          chaves associando-as aos valores:          --\n" \
+	        "--          \'aa\', \'ab\', ..., \'da\', ..., \'zz\'           --\n" \
+	        "---------------------------------------------------------\n");
+	printf("\n");
+
+	printf(" Pressione ENTER para voltar ao menu. ");
+	getchar();
+
+	return HOME;
+}
+
+int run_window() {
+	print_header();
+
+	int order;
+
+	printf("  Um nó de uma B-Tree de ordem T deve ter no mínimo T-1\n" \
+	       "               e no máximo 2*T filhos\n");
+	printf("\n");
+	printf(" Digite a ordem T da sua B-Tree: ");
+	scanf("%d%*c", &order);
+
+	tree = btree_new(order);
+	snprintf(msg, MSG_LEN, " B-Tree de ordem %d alocada.", order);
+
+	return RUNNING;
+}
+
+int running_window() {
+	int n_items = 5;
+	char list[5][15] = { "Inserir", "Pesquisar", "Remover", "Imprimir DFS", "Voltar" };
+
+	int opt;
+
+	print_header();
+
+	int i;
+	for (i = 0; i < n_items; ++i) {
+		printf(" %d) %s\n", i+1, list[i]);
+	}
+
+	printf("\n");
+	printf(" Digite uma opção: ");
+	scanf("%d%*c", &opt);
+
+	int key;
+	node_position pos;
+	switch (opt) {
+		case 1:         // Inserir
+			if (n_keys == max_keys) {
+				snprintf(msg, MSG_LEN, " O máximo de chaves adicionáveis para essa demo é %d.", max_keys);
+			}
+			else {
+				printf(" Digite uma CHAVE que será associada ao VALOR \'%s\': ", values[n_keys]);
+				scanf("%d", &key);
+				pos = btree_insert(tree, key, values[n_keys]);
+				if (pos.node == NULL) {
+					snprintf(msg, MSG_LEN, " Inserção falhou. Provavelmente, a CHAVE %d já existe na B-Tree.", key);
+				}
+				else {
+					snprintf(msg, MSG_LEN, " Inserção da CHAVE %d associada ao VALOR \'%s\' realizada com sucesso.",
+                                key, values[n_keys]);
+					n_keys++;
+				}
+			}
+			break;
+		case 2:         // Pesquisar
+			printf(" Digite uma CHAVE para pesquisar: ");
+			scanf("%d", &key);
+			pos = btree_find(tree, key);
+			if (pos.node == NULL) {
+				snprintf(msg, MSG_LEN, " A CHAVE %d não foi encontrada na B-Tree.", key);
+			}
+			else {
+				snprintf(msg, MSG_LEN, " A CHAVE %d foi encontrada associada ao VALOR \'%s\'.",
+				         key, (char*) pos.node->keys[pos.index]->value);
+			}
+
+			break;
+		case 3:         // Remover
+			printf(" Digite uma CHAVE para remover: ");
+			scanf("%d", &key);
+			pos = btree_remove(tree, key);
+			if (pos.node == NULL) {
+				snprintf(msg, MSG_LEN, " A CHAVE %d não foi encontrada na B-Tree.", key);
+			}
+			else {
+				snprintf(msg, MSG_LEN, " A CHAVE %d foi removida com sucesso.", key);
+			}
+			break;
+		case 4:         // Imprimir
+			printf(" Executando uma DFS na B-Tree:\n");
+			btree_dfs(tree);
+			printf(" Pressione ENTER para continuar. ");
+			getchar();
+			break;
+		case 5:         // Voltar/Sair
+			snprintf(msg, MSG_LEN, " Deletando B-Tree e voltando ao menu");
+			goodbye();
+			btree_delete_h(tree);
+			return HOME;
+			break;
+		default:
+			snprintf(msg, MSG_LEN, " Opção inválida");
+			return RUNNING;
+			break;
+	}
+
+	return RUNNING;
+}
+
+void print_header() {
+	CLEAR();
+	printf( "---------------------------------------------------------\n" \
+	        "--                    B-Tree - v1.0                    --\n" \
+	        "--                  Desenvolvido por:                  --\n" \
+	        "--      Antonio Carlos Falcão Petri e Thiago Yonamine  --\n" \
+	        "---------------------------------------------------------\n");
+
+	printf("\n");
+
+	if (strcmp(msg, "-")) {
+		printf("%s\n\n", msg);
+		snprintf(msg, MSG_LEN, "-");
+	}
+}
+
+void goodbye() {
+	print_header();
+	int i;
+    printf(" ");
+	for (i = 0; i < 4; ++i) {
+		printf(".");
+		fflush(stdout);
+		usleep(500000);
+	}
+
+	CLEAR();
 }
 
 int main() {
+	screen next_screen = HOME;
+	populate_values();
+	snprintf(msg, MSG_LEN, "-");
+	n_keys = 0;
 
-	one_tree();
-	stack_tree();
-	//multiple_trees();
+	while (next_screen != EXIT) {
+		switch (next_screen) {
+		case HOME:
+			next_screen = home_window();
+			break;
+		case ABOUT:
+			next_screen = about_window();
+			break;
+		case RUN:
+			next_screen = run_window();
+			break;
+		case RUNNING:
+			next_screen = running_window();
+			break;
+		case EXIT:
+			break;
+		}
+	}
+
+	snprintf(msg, MSG_LEN, " Saindo da aplicação");
+	goodbye();
 
 	return 0;
 }

@@ -1,19 +1,20 @@
 # Source: http://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure/
-# TODO tester
-
 CC := gcc
 SRCDIR := src
 BUILDDIR := build
-TARGET := bin/btree
+BINDIR := bin
+TARGET := $(BINDIR)/btree
 
 SRCEXT := c
 SOURCES:=$(wildcard $(SRCDIR)/*.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -g -Wall -DDEBUG=1
+FILTERED_OBJECTS := $(filter-out $(BUILDDIR)/main.o, $(OBJECTS))
+CFLAGS := #-g -Wall -DDEBUG=1
 LIB :=
 INC := -I include
 
 $(TARGET): $(OBJECTS)
+	@mkdir -p $(dir $@)
 	@echo " Linking..."
 	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB)
 
@@ -23,10 +24,11 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 
 clean:
 	@echo " Cleaning...";
-	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BUILDDIR) $(BINDIR)/*"; $(RM) -r $(BUILDDIR) $(BINDIR)/*
 
 # Tests
-tester:
-	# $(CC) $(CFLAGS) test/tester.cpp $(INC) $(LIB) -o bin/tester
+debug: $(TARGET)
+	@echo " Lembre-se de habilitar as flags de debug nas CFLAGS...";
+	@echo " $(CC) $(CFLAGS) $(FILTERED_OBJECTS) test/debug.c $(INC) $(LIB) -o bin/debug"; $(CC) $(CFLAGS) $(FILTERED_OBJECTS) test/debug.c $(INC) $(LIB) -o bin/debug
 
 .PHONY: clean
