@@ -1,3 +1,7 @@
+/*
+    B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
+    UFSCar - São Carlos - 2015
+ */
 #include "btree.h"
 
 BTree* btree_new(int order) {
@@ -8,6 +12,7 @@ BTree* btree_new(int order) {
 	printf("allocated new b-tree of order %d\n", order);
 	#endif
 
+	// Após alocar, temos que inicializar a B-Tree
 	btree_init(bt, order);
 
 	return bt;
@@ -35,13 +40,20 @@ node_position _btree_find_node(node_t* node, int key) {
 
 	int pos;
 	if (_node_find_key(node, key, &pos)) {
+		// Se a chave foi encontrada nesse nó,
+		// retorne um meio de acessá-la
 		return _node_position_new(node, pos);
 	}
 	else {
+		// Se a chave não foi encontrada
 		if (node->is_leaf) {
+			// e o nó atual é uma folha,
+			// então key não pertence à B-Tree
 			return _node_position_new(NULL, -1);
 		}
 		else {
+			// e o nó atual possui filhos,
+			// então devemos explor o filho na posição pos
 			return _btree_find_node(node->children[pos], key);
 		}
 	}
@@ -55,9 +67,17 @@ node_position btree_insert(BTree* bt, int key, void *value) {
 	#endif
 
 	node_t *root = bt->root;
+
+	// Esse pair será enviado durante as chamadas recursivas de inserção,
+	// e é o que realmente será inserido na B-Tree
 	pair_t *pair = _pair_new(key, value);
 
 	if (root->n_keys == 2*bt->order -1) {
+		// Caso a raiz da B-Tree já esteja cheia,
+		// devemos executar o procedimento de split
+		// e deixá-la com apenas uma chave.
+		// Esse é o único caso em que a altura da B-Tree aumenta
+
 		#if DEBUG
 		printf("root full - spliting up\n");
 		#endif
@@ -68,9 +88,11 @@ node_position btree_insert(BTree* bt, int key, void *value) {
 		_btree_split(new_root, 0, bt->order);
 		bt->root = new_root;
 
+		// Podemos prosseguir com a inserção
 		return _btree_insert_nonfull(new_root, pair, bt->order);
 	}
 	else {
+		// A raiz respeita a restrição de não estar cheia
 		#if DEBUG
 		printf("root not full - calling _btree_insert_nonfull()\n");
 		#endif
@@ -80,6 +102,9 @@ node_position btree_insert(BTree* bt, int key, void *value) {
 }
 
 void _btree_split(node_t *node, int pos, int order) {
+	// Para mais informações, consulte a documentação,
+	// em especial o pseudo-código B-Tree-Split-Child
+
 	node_t *y = node->children[pos];
 	assert(y != NULL);
 
@@ -114,13 +139,15 @@ void _btree_split(node_t *node, int pos, int order) {
 	#if DEBUG
 	printf("inserting key %d at %d of new-root\n", y->keys[order-1]->key, pos);
 	#endif
-	node->keys[pos] = _pair_copy(y->keys[order-1]);
-	free(y->keys[order-1]);
+	node->keys[pos] = y->keys[order-1];
 
 	node->n_keys++;
 }
 
 node_position _btree_insert_nonfull(node_t * node, pair_t *pair, int order) {
+	// Para mais informações, consulte a documentação,
+	// em especial o pseudo-código B-Tree-Insert-Nonfull
+
 	#if DEBUG
 	printf("at _btree_insert_nonfull() with key %d\n", pair->key);
 	#endif
@@ -164,27 +191,37 @@ node_position _btree_insert_nonfull(node_t * node, pair_t *pair, int order) {
 }
 
 node_position btree_remove(BTree* bt, int key) {
+	// Para mais informações, consulte a documentação,
+	// em especial o pseudo-código B-Tree-Remove
+
 	assert(bt != NULL);
 
 	node_position pos = _btree_remove_node(bt->root, key, bt->order);
 	if (bt->root->n_keys == 0 && pos.node != NULL && pos.node != bt->root) {
+		// A B-Tree deve diminuir de altura, pois a remoção fez com que
+		// a raiz ficasse vazia. A nova raiz será o nó-filho da esquerda.
 	    #if DEBUG
 		printf("BTree root became empty. New root will be its left child\n");
 	    #endif
 
 		bt->root = bt->root->children[0];
+		assert(bt->root != NULL);
 	}
 
 	return pos;
 }
 
 node_position _btree_remove_node(node_t *node, int key, int order) {
+	// Para mais informações, consulte a documentação,
+	// em especial o pseudo-código B-Tree-Remove-Node
+
 	#if DEBUG
 	printf("at btree_remove_node() to remove key %d\n", key);
 	#endif
 
 	int pos;
 	if (_node_find_key(node, key, &pos)) {
+		// Caso a chave está foi encontrada nesse nó
 		#if DEBUG
 		printf("found %d at pos %d\n", key, pos);
 		#endif
@@ -286,25 +323,26 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 	else {
 		if (node->is_leaf) {
 			/*
-			    Key não foi encontrada em um nó folha == key não
+			    key não foi encontrada em um nó folha => key não
 			    pertence à árvore
 			 */
 			return _node_position_new(NULL, -1);
 		}
 
+		/*
+		        Caso 3: se a chave k não está presente em um nó interno x,
+		        determine a raiz x.ci da subárvore que deve conter k.
+		 */
+
 		node_t *next = node->children[pos];
 
 		if (next->n_keys == order-1) {
-			#if DEBUG
-			printf("case 3a-");
-			#endif
-
 			node_t *left = next;
 			node_t *right = node->children[pos+1];
 
 			if (left->n_keys >= order) {
 				#if DEBUG
-				printf("left ok\n");
+				printf("Case 3b-left ok\n");
 				#endif
 
 				node_position max = _node_find_max(left);
@@ -329,7 +367,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 			}
 			else if (right->n_keys >= order) {
 				#if DEBUG
-				printf("right ok\n");
+				printf("Case 3b-right ok\n");
 				#endif
 
 				node_position min = _node_find_min(right);
@@ -353,6 +391,9 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				return _btree_remove_node(left, key, order);
 			}
 			else {
+				#if DEBUG
+				printf("Case 3a");
+				#endif
 				left->keys[order-1] = node->keys[pos];
 
 				_node_deslocate_keys_up(node, node, pos, node->n_keys-1, 0, 1);
@@ -372,6 +413,8 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 }
 
 void btree_delete_s(BTree *bt) {
+	// Deleta uma B-Tree sem chamar free(tree),
+	// mas sim removendo todas as chaves que ela possui
 	#if DEBUG
 	printf("deleting b-tree\n");
 	#endif
@@ -388,6 +431,9 @@ void btree_delete_s(BTree *bt) {
 }
 
 void btree_delete_h(BTree *bt) {
+	// Deleta a B-Tree e todas as suas chaves-valores.
+	// A B-Tree deve ter sido alocada com uma função malloc(),
+	// caso contrário, tem-se comportamento indefinido
 	btree_delete_s(bt);
 	free(bt);
 }

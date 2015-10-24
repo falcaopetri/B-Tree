@@ -1,6 +1,11 @@
+/*
+	B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
+	UFSCar - São Carlos - 2015
+ */
 #include "btree_util.h"
 
 node_position _node_position_new(node_t *node, int index) {
+	// Apenas retorna um node_position com os valores informados
 	node_position node_pos = {.node = node, .index = index};
 	return node_pos;
 }
@@ -43,10 +48,15 @@ node_t* _node_new(int order, bool is_leaf) {
 
 inline bool _node_find_key(node_t *node, int key, int *pos) {
 	*pos = 0;
+
+	// Encontra a posição cuja chave é imediatamente maior ou igual à key
+	// (respeitando o número de chaves ativas no nó)
 	while ((*pos) < node->n_keys && key > node->keys[(*pos)]->key) {
 		(*pos)++;
 	}
 
+	// A chave foi encontrada apenas se a posição (*pos)
+	// pertence ao nó e se a chave está nessa posição
 	return (*pos) < node->n_keys && key == node->keys[(*pos)]->key;
 }
 

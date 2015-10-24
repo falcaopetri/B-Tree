@@ -1,3 +1,5 @@
+# B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
+# UFSCar - São Carlos - 2015
 # Source: http://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure/
 CC := gcc
 SRCDIR := src
@@ -9,6 +11,7 @@ SRCEXT := c
 SOURCES:=$(wildcard $(SRCDIR)/*.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 FILTERED_OBJECTS := $(filter-out $(BUILDDIR)/main.o, $(OBJECTS))
+# Descomente essa linha para ativar o modo DEBUG
 CFLAGS := #-g -Wall -DDEBUG=1
 LIB :=
 INC := -I include

@@ -1,6 +1,23 @@
-#if DEBUG
+/*
+	B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
+	UFSCar - São Carlos - 2015
+
+	Define uma main() para propósitos de teste
+	Executa:
+		- criação na Stack
+		- criação na Heap
+		- criação de múltiplas árvores
+		- inserção, remoção e pesquisa de chaves
+	Gera um trace completo de todas as operações
+
+	Uso:
+		Compilar a B-Tree e esse arquivo com a flag DEBUG=1.
+		Para tal, basta editar a variável $CFLAGS no makefile e executar:
+		$ make clean
+		$ make debug
+		$ ./bin/debug
+*/
 #include <stdio.h>
-#endif
 
 #include "btree.h"
 #include "btree_tools.h"
@@ -11,6 +28,7 @@ void one_tree() {
 	#endif
 
 	BTree* tree = btree_new(2);
+	// BTree* tree = btree_new(3);
 
 	int n = 6;
 	int nums_insert[] = {5, 1, 10, 12, 20, 8};
@@ -68,9 +86,14 @@ void multiple_trees() {
 
 int main() {
 
+	#if DEBUG
 	one_tree();
 	stack_tree();
 	multiple_trees();
+	#else
+	printf("Não se esqueça de compilar esse exemplo (e os arquivos da B-Tree)" \
+	 		" com a flag DEBUG setada para verdadeiro: -DDEBUG=1\n");
+	#endif
 
 	return 0;
 }
