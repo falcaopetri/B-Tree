@@ -1,16 +1,16 @@
 /*
 	B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
-	UFSCar - São Carlos - 2015
+	DC - UFSCar - São Carlos - 2015
  */
 #include "btree_tools.h"
 
-void btree_dfs_node(node_t *node, int level) {
+void _btree_dfs_node(node_t *node, int level) {
 	assert(node != NULL);
 
 	int i;
 	if (!node->is_leaf) {
 		for (i = 0; i < node->n_keys+1; ++i) {
-			btree_dfs_node(node->children[i], level+1);
+			_btree_dfs_node(node->children[i], level+1);
 		}
 	}
 
@@ -22,9 +22,9 @@ void btree_dfs_node(node_t *node, int level) {
 	printf("\n");
 }
 
-void btree_dfs(BTree *tree) {
-	assert(tree != NULL);
-	btree_dfs_node(tree->root, 0);
+void btree_dfs(BTree *bt) {
+	assert(bt != NULL);
+	_btree_dfs_node(bt->root, 0);
 }
 
 void print_find(BTree *tree, int key) {

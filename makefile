@@ -1,5 +1,5 @@
 # B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
-# UFSCar - São Carlos - 2015
+# DC - UFSCar - São Carlos - 2015
 # Source: http://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure/
 CC := gcc
 SRCDIR := src

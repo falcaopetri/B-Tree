@@ -1,6 +1,6 @@
 /*
     B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
-    UFSCar - São Carlos - 2015
+    DC - UFSCar - São Carlos - 2015
  */
 #ifndef B_TREE_TOOLS_H
 #define B_TREE_TOOLS_H
@@ -13,12 +13,12 @@
     Executa uma DFS em node, imprimindo as chaves associadas à ele.
     Usa o parâmetro level no print dos dados do nó.
  */
-void btree_dfs_node(node_t *node, int level);
+void _btree_dfs_node(node_t *node, int level);
 /*
     Executa uma DFS na B-Tree, imprimindo dados associados aos seus nós
     (em especial suas chaves) em ordem POSFIXA.
  */
-void btree_dfs(BTree *tree);
+void btree_dfs(BTree *bt);
 
 /*
     Função para testes.

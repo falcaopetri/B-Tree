@@ -1,6 +1,6 @@
 /*
     B-Tree - Antonio Carlos Falcão Petri e Thiago Yonamine
-    UFSCar - São Carlos - 2015
+    DC - UFSCar - São Carlos - 2015
 
     Essa é uma aplicação DEMO para apresentar a B-Tree desenvolvida.
 
