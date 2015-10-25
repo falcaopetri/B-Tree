@@ -98,7 +98,16 @@ int key);`
     - Executa uma DFS sobre `bt` imprimindo o conteúdo dos seus nós em ordem **posfixa**.
 
 ### Criação
-`BTree *tree = btree_new(2);`
+```
+BTree *tree = btree_new(2);
+```
+
+ou
+
+```
+BTree tree;
+btree_init(tree, 2);
+```
 
 Pseudo-código:
 ```
@@ -139,10 +148,22 @@ B-Tree-Insert(T, Key, Order)
 `node_position pos = btree_remove(tree, key);`
 
 ### Deleção
-`btree_delete(tree);`
+`btree_delete_s(tree);`
+
+ou
+
+`btree_delete_h(tree);`
 
 A deleção da B-Tree é executada aplicando-se a remoção sobre a primeira chave da raiz, enquanto existirem chaves.
 
-Apesar de a operação poder ser mais eficiente aplicando-se, por exemplo, uma DFS de deleção, é garantido que a remoção eliminará todos os `pair's` e `node's` gerados na B-Tree.
+Pseudo-Código:
+```
+while T.root.nKkeys > 0:
+    BTree-Remove(T, T.root.keys[0])
+```
+Apesar de a operação poder ser mais eficiente aplicando-se, por exemplo, uma DFS de deleção, também é garantido que a remoção eliminará todos os `pair's` e `node's` gerados na B-Tree.
 
 Após o fim da remoção, deleta-se o nó raiz.
+
+As duas funções diferem apenas em um passo:
+- Invocar `btree_delete_h(tree)` implica em desalocar também o **ponteiro tree**.

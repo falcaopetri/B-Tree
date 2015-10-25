@@ -451,7 +451,7 @@ void btree_delete_s(BTree *bt) {
 		btree_remove(bt, bt->root->keys[0]->key);
 	}
 
-	free(bt->root);
+	_node_delete(bt->root);
 }
 
 void btree_delete_h(BTree *bt) {
