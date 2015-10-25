@@ -153,7 +153,7 @@ node_position _btree_insert_nonfull(node_t * node, pair_t *pair, int order) {
 	#endif
 
 	int pos = node->n_keys - 1;
-	if (node->is_leaf)   {
+	if (node->is_leaf) {
 		#if DEBUG
 		printf("at leaf node\n");
 		#endif
@@ -162,31 +162,55 @@ node_position _btree_insert_nonfull(node_t * node, pair_t *pair, int order) {
 			node->keys[pos+1] = node->keys[pos];
 			pos--;
 		}
-		pos++;
 
-		node->keys[pos] = pair;
-		node->n_keys++;
+		if (pos >= 0 && pair->key == node->keys[pos]->key) {
+			#if DEBUG
+			printf("duplicated key. ignoring insertion.");
+			#endif
+
+			pos++;
+			while (pos != node->n_keys) {
+				node->keys[pos] = node->keys[pos+1];
+				pos++;
+			}
+
+			return _node_position_new(NULL, -1);
+		}
+		else {
+			pos++;
+
+			node->keys[pos] = pair;
+			node->n_keys++;
+			return _node_position_new(node, pos);
+		}
 
 		#if DEBUG
 		printf("inserted key %d at position %d\n", pair->key, pos);
 		#endif
-
-		return _node_position_new(node, pos);
 	}
 	else {
 		while (pos >= 0 && pair->key < node->keys[pos]->key) {
 			pos--;
 		}
-		pos++;
+		if (pos >= 0 && pair->key == node->keys[pos]->key) {
+			#if DEBUG
+			printf("duplicated key. ignoring insertion.");
+			#endif
 
-		if (node->children[pos]->n_keys == 2*order-1) {
-			_btree_split(node, pos, order);
-			if (pair->key > node->keys[pos]->key) {
-				pos++;
-			}
+			return _node_position_new(NULL, -1);
 		}
+		else {
+			pos++;
 
-		return _btree_insert_nonfull(node->children[pos], pair, order);
+			if (node->children[pos]->n_keys == 2*order-1) {
+				_btree_split(node, pos, order);
+				if (pair->key > node->keys[pos]->key) {
+					pos++;
+				}
+			}
+
+			return _btree_insert_nonfull(node->children[pos], pair, order);
+		}
 	}
 }
 

@@ -203,7 +203,7 @@ int running_screen() {
 			scanf("%d", &key);
 			pos = btree_insert(tree, key, values[n_keys]);
 			if (pos.node == NULL) {
-				snprintf(msg, MSG_LEN, " Inserção falhou. Provavelmente, a CHAVE %d já existe na B-Tree.", key);
+				snprintf(msg, MSG_LEN, " Inserção falhou. A CHAVE %d já existe na B-Tree.", key);
 			}
 			else {
 				snprintf(msg, MSG_LEN, " Inserção da CHAVE %d associada ao VALOR \'%s\' realizada com sucesso.",

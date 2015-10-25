@@ -12,7 +12,7 @@ SOURCES:=$(wildcard $(SRCDIR)/*.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 FILTERED_OBJECTS := $(filter-out $(BUILDDIR)/main.o, $(OBJECTS))
 # Descomente essa linha para ativar o modo DEBUG
-CFLAGS := #-g -Wall -DDEBUG=1
+CFLAGS := -Wall #-g -DDEBUG=1
 LIB :=
 INC := -I include
 
