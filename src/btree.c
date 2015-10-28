@@ -365,8 +365,17 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 			node_t *right = node->children[pos+1];
 
 			if (left->n_keys >= order) {
+				/*
+					a-left) Se x.c[i] tiver apenas t-1 chaves, mas possui o irmão
+					esquerdo imediato com pelo menos t chaves, mover uma chave de x
+					para x.c[i].
+
+					Mover para x uma chave do irmão imediato esquerdo de x.c[i].
+					Mover os ponteiros associados para que apontem para os filhos
+					corretos.
+				 */
 				#if DEBUG
-				printf("Case 3b-left ok\n");
+				printf("Case 3a-left ok\n");
 				#endif
 
 				node_position max = _node_find_max(left);
@@ -390,8 +399,17 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				return _btree_remove_node(right, key, order);
 			}
 			else if (right->n_keys >= order) {
+				/*
+					a-right) Se x.c[i] tiver apenas t-1 chaves, mas possui o irmão
+					direito imediato com pelo menos t chaves, mover uma chave de x
+					para x.c[i].
+
+					Mover para x uma chave do irmão imediato direito de x.c[i].
+					Mover os ponteiros associados para que apontem para os filhos
+					corretos.
+				 */
 				#if DEBUG
-				printf("Case 3b-right ok\n");
+				printf("Case 3a-right ok\n");
 				#endif
 
 				node_position min = _node_find_min(right);
@@ -415,8 +433,16 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				return _btree_remove_node(left, key, order);
 			}
 			else {
+				/*
+					b) Se x.c[i] e ambos os seus irmãos imediatos tiverem t-1
+					chaves, concatenar x.c[i] com um de seus irmãos.
+
+					Essa concatenação envolve mover uma chave de x para o novo
+					nó criado com a concatenação, para que ele se torne a chave
+					mediana desse novo nó.
+				 */
 				#if DEBUG
-				printf("Case 3a");
+				printf("Case 3b");
 				#endif
 				left->keys[order-1] = node->keys[pos];
 
