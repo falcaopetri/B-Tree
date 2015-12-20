@@ -127,14 +127,14 @@ void _btree_split(node_t *node, int pos, int order) {
 	#if DEBUG
 	printf("deslocating new-root childrens pos: ");
 	#endif
-	_node_deslocate_children_down(node, node, node->n_keys, pos+1, 1, 0);
+	_node_deslocate_children_down(node, node, node->n_keys, pos, 1, 0);
 
 	node->children[pos+1] = z;
 
 	#if DEBUG
 	printf("moving %d keys: ", node->n_keys);
 	#endif
-	_node_deslocate_keys_down(node, node, node->n_keys-1, pos, 1, 0);
+	_node_deslocate_keys_down(node, node, node->n_keys-1, pos-1, 1, 0);
 
 	#if DEBUG
 	printf("inserting key %d at %d of new-root\n", y->keys[order-1]->key, pos);
@@ -179,14 +179,14 @@ node_position _btree_insert_nonfull(node_t * node, pair_t *pair, int order) {
 		else {
 			pos++;
 
+			#if DEBUG
+			printf("inserted key %d at position %d\n", pair->key, pos);
+			#endif
+
 			node->keys[pos] = pair;
 			node->n_keys++;
 			return _node_position_new(node, pos);
 		}
-
-		#if DEBUG
-		printf("inserted key %d at position %d\n", pair->key, pos);
-		#endif
 	}
 	else {
 		while (pos >= 0 && pair->key < node->keys[pos]->key) {
@@ -291,9 +291,11 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				free(node->keys[pos]);
 
 				node_position max = _node_find_max(left);
-				node->keys[pos] = _pair_copy(left->keys[max.index]);
+				pair_t *p = _pair_copy(max.node->keys[max.index]);
 
-				_btree_remove_node(left, node->keys[pos]->key, order);
+				node->keys[pos] = p;
+
+				_btree_remove_node(left, p->key, order);
 				return _node_position_new(node, pos);
 			}
 			else if (right->n_keys >= order) {
@@ -312,9 +314,10 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				free(node->keys[pos]);
 
 				node_position min = _node_find_min(right);
-				node->keys[pos] = _pair_copy(right->keys[min.index]);
+				pair_t *p = _pair_copy(min.node->keys[min.index]);
+				node->keys[pos] = p;
 
-				_btree_remove_node(right, node->keys[pos]->key, order);
+				_btree_remove_node(right, p->key, order);
 				return _node_position_new(node, pos);
 			}
 			else {
@@ -362,7 +365,16 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 
 		if (next->n_keys == order-1) {
 			node_t *left = next;
-			node_t *right = node->children[pos+1];
+
+			node_t *right;
+			if (pos == node->n_keys) {
+				node_t *tmp = left;
+				left = node->children[pos-1];
+				right = tmp;
+			}
+			else {
+				right = node->children[pos+1];
+			}
 
 			if (left->n_keys >= order) {
 				/*
@@ -379,7 +391,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				#endif
 
 				node_position max = _node_find_max(left);
-				pair_t* p = _pair_copy(left->keys[max.index]);
+				pair_t *p = _pair_copy(max.node->keys[max.index]);
 
 				#if DEBUG
 				printf("removing %d\n", p->key);
@@ -387,14 +399,14 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				_btree_remove_node(left, p->key, order);
 
 				#if DEBUG
-				printf("inserting %d at right\n", node->keys[pos]->key);
+				printf("inserting %d at right\n", node->keys[pos-1]->key);
 				#endif
-				_btree_insert_nonfull(right, node->keys[pos], order);
+				_btree_insert_nonfull(right, node->keys[pos-1], order);
 
 				#if DEBUG
 				printf("deslocating %d up\n", p->key);
 				#endif
-				node->keys[pos] = p;
+				node->keys[pos-1] = p;
 
 				return _btree_remove_node(right, key, order);
 			}
@@ -413,7 +425,7 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				#endif
 
 				node_position min = _node_find_min(right);
-				pair_t* p = _pair_copy(right->keys[min.index]);
+				pair_t *p = _pair_copy(min.node->keys[min.index]);
 
 				#if DEBUG
 				printf("removing %d\n", p->key);
@@ -421,14 +433,14 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 				_btree_remove_node(right, p->key, order);
 
 				#if DEBUG
-				printf("inserting %d at left\n", node->keys[pos]->key);
+				printf("inserting %d at left\n", node->keys[pos-1]->key);
 				#endif
-				_btree_insert_nonfull(left, node->keys[pos], order);
+				_btree_insert_nonfull(left, node->keys[pos-1], order);
 
 				#if DEBUG
 				printf("deslocating %d up\n", p->key);
 				#endif
-				node->keys[pos] = p;
+				node->keys[pos-1] = p;
 
 				return _btree_remove_node(left, key, order);
 			}
@@ -442,18 +454,18 @@ node_position _btree_remove_node(node_t *node, int key, int order) {
 					mediana desse novo nó.
 				 */
 				#if DEBUG
-				printf("Case 3b");
+				printf("Case 3b\n");
 				#endif
-				left->keys[order-1] = node->keys[pos];
-
+				left->keys[order-1] = node->keys[pos-1];
 				_node_deslocate_keys_up(node, node, pos, node->n_keys-1, 0, 1);
-				_node_deslocate_children_up(node, node, pos, node->n_keys-1, 1, 2);
+				_node_deslocate_children_up(node, node, pos+1, node->n_keys, 0, 1);
 				node->n_keys--;
 
 				_node_deslocate_keys_up(left, right, 0, order-1, order, 0);
-				_node_deslocate_children_up(left, right, 0, order, 0, 0);
+				_node_deslocate_children_up(left, right, 0, right->n_keys+1, order-1, 0);
 				_node_delete(right);
 
+				left->n_keys = 2*order-1;
 				return _btree_remove_node(left, key, order);
 			}
 		}

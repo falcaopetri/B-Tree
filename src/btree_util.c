@@ -61,6 +61,10 @@ inline bool _node_find_key(node_t *node, int key, int *pos) {
 }
 
 inline void _node_deslocate_keys_up(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+	#if DEBUG
+	printf("_node_deslocate_keys_up: ");
+	#endif
+
 	int j;
 	for (j = beg; j < end; j++) {
 		to->keys[j + padding_to] = from->keys[j + padding_from];
@@ -76,6 +80,10 @@ inline void _node_deslocate_keys_up(node_t *to, node_t *from, int beg, int end, 
 }
 
 inline void _node_deslocate_keys_down(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+	#if DEBUG
+	printf("_node_deslocate_keys_down: ");
+	#endif
+
 	int j;
 	for (j = beg; j > end; j--) {
 		to->keys[j + padding_to] = from->keys[j + padding_from];
@@ -91,6 +99,9 @@ inline void _node_deslocate_keys_down(node_t *to, node_t *from, int beg, int end
 
 inline void _node_deslocate_children_up(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
 	int j;
+	#if DEBUG
+	printf("_node_deslocate_children_up: ");
+	#endif
 	for (j = beg; j < end; j++) {
 		to->children[j + padding_to] = from->children[j + padding_from];
 	    #if DEBUG
@@ -104,6 +115,10 @@ inline void _node_deslocate_children_up(node_t *to, node_t *from, int beg, int e
 }
 
 inline void _node_deslocate_children_down(node_t *to, node_t *from, int beg, int end, int padding_to, int padding_from) {
+	#if DEBUG
+	printf("_node_deslocate_children_down: ");
+	#endif
+
 	int j;
 	for (j = beg; j > end; j--) {
 		to->children[j + padding_to] = from->children[j + padding_from];
@@ -118,13 +133,25 @@ inline void _node_deslocate_children_down(node_t *to, node_t *from, int beg, int
 }
 
 inline node_position _node_find_max(node_t *node) {
-	// Apenas retorne a última chave do nó
-	return _node_position_new(node, node->n_keys-1);
+	assert(node != NULL);
+
+	if (node->is_leaf) {
+		return _node_position_new(node, node->n_keys-1);
+	}
+	else {
+		return _node_find_max(node->children[node->n_keys]);
+	}
 }
 
 inline node_position _node_find_min(node_t *node) {
-	// Apenas retorne a primeira chave do nó
-	return _node_position_new(node, 0);
+	assert(node != NULL);
+
+	if (node->is_leaf) {
+		return _node_position_new(node, 0);
+	}
+	else {
+		return _node_find_max(node->children[0]);
+	}
 }
 
 inline void _node_delete(node_t *node) {
